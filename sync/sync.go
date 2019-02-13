@@ -27,8 +27,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/thoas/go-funk"
-	"gopkg.in/yaml.v2"
+	funk "github.com/thoas/go-funk"
+	yaml "gopkg.in/yaml.v2"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kube "k8s.io/client-go/kubernetes"
@@ -94,7 +94,8 @@ func (s *Syncer) TriggerSync() {
 // Sync performs the sync operation.
 func (s *Syncer) Sync() ([]string, error) {
 	var config AmbassadorConfig
-	var ambassadorService *v1.Service
+	var ambassadorService v1.Service
+	var ambassadorServiceFound bool
 
 	hosts := make([]string, 0)
 	namespaces, err := s.client.CoreV1().Namespaces().List(metav1.ListOptions{})
@@ -108,7 +109,8 @@ func (s *Syncer) Sync() ([]string, error) {
 		}
 		for _, service := range services.Items {
 			if namespace.Name == s.serviceNamespace && service.Name == s.serviceName {
-				ambassadorService = &service
+				ambassadorService = service
+				ambassadorServiceFound = true
 			}
 			for key, value := range service.Annotations {
 				if key == AmbassadorAnnotationKey {
@@ -126,7 +128,7 @@ func (s *Syncer) Sync() ([]string, error) {
 								hosts = append(hosts, config.Host)
 							}
 						} else {
-							log.Debugf("Service %s.%s doesn't host defined on ambassador mapping annotation", namespace.Name, service.Name)
+							log.Debugf("Service %s.%s doesn't have host defined on ambassador mapping annotation", namespace.Name, service.Name)
 						}
 					} else {
 						log.Debugf("Service %s.%s doesn't have a ambassador mapping annotation", namespace.Name, service.Name)
@@ -145,7 +147,7 @@ func (s *Syncer) Sync() ([]string, error) {
 		log.Debugf("Found zero hosts to set for external dns, annotation will be removed")
 	}
 
-	if ambassadorService == nil {
+	if !ambassadorServiceFound {
 		return hosts, fmt.Errorf("Failed to find ambassador service to update external-dns annotation on")
 	}
 
@@ -168,7 +170,7 @@ func (s *Syncer) Sync() ([]string, error) {
 		needsUpdate = true
 	}
 	if needsUpdate {
-		_, err := s.client.CoreV1().Services(s.serviceNamespace).Update(ambassadorService)
+		_, err := s.client.CoreV1().Services(s.serviceNamespace).Update(&ambassadorService)
 		if err != nil {
 			return hosts, err
 		}
