@@ -1,8 +1,3 @@
-ifndef GOPATH
-$(error You need to set up a GOPATH.  See the README file.)
-endif
-
-PATH = $(GOPATH)/bin:$(shell printenv PATH)
 
 default: build
 

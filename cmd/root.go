@@ -23,9 +23,10 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"time"
+	"os/signal"
+	"sync"
 
-	"github.com/blakerouse/external-ambassador/sync"
+	esync "github.com/blakerouse/external-ambassador/sync"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -66,16 +67,14 @@ the ambassador service.`,
 			}
 		}
 
-		watcher, err := sync.NewWatcher(config, serviceNamespace, serviceName)
+		watcher, err := esync.NewWatcher(config, serviceNamespace, serviceName)
 		if err != nil {
 			panic(err.Error())
 		}
 		if err := watcher.Start(); err != nil {
 			panic(err.Error())
 		}
-		for {
-			time.Sleep(time.Second)
-		}
+		waitForInt()
 		_ = watcher.Stop()
 	},
 }
@@ -107,4 +106,18 @@ func initLogger() {
 	if debug {
 		log.SetLevel(log.DebugLevel)
 	}
+}
+
+// waitForInt waits for interrupt signal.
+func waitForInt() {
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+	go func() {
+		<-sig
+		wg.Done()
+	}()
+	wg.Wait()
 }
