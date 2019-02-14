@@ -9,4 +9,4 @@ WORKDIR /app
 RUN apk add ca-certificates
 COPY --from=build-env /src/external-ambassador /app/
 EXPOSE 8080
-CMD [ "external-ambassador" ]
+ENTRYPOINT "external-ambassador"

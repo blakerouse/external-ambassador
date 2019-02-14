@@ -79,7 +79,7 @@ the ambassador service.`,
 	},
 }
 
-// Executes the rootCmd.
+// Execute runs the application.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
