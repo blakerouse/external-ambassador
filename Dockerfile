@@ -8,5 +8,5 @@ FROM alpine:3.8
 WORKDIR /app
 RUN apk add ca-certificates
 COPY --from=build-env /src/external-ambassador /app/
-EXPOSE 8080
-ENTRYPOINT "/app/external-ambassador"
+COPY --from=build-env /src/app-entry.sh /app/
+ENTRYPOINT [ "./app-entry.sh" ]

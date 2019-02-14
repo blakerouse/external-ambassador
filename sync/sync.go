@@ -174,9 +174,9 @@ func (s *Syncer) Sync() ([]string, error) {
 		if err != nil {
 			return hosts, err
 		}
-		log.Debugf("Service %s.%s was external-dns annotation was updated", s.serviceNamespace, s.serviceName)
+		log.Debugf("Service %s.%s external-dns annotation was updated", s.serviceNamespace, s.serviceName)
 	} else {
-		log.Debugf("Service %s.%s was external-dns annotation not updated", s.serviceNamespace, s.serviceName)
+		log.Debugf("Service %s.%s external-dns annotation was not updated", s.serviceNamespace, s.serviceName)
 	}
 
 	return hosts, nil
