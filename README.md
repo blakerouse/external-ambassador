@@ -30,8 +30,11 @@ metadata:
   name: external-ambassador
 rules:
 - apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get","list"]
+- apiGroups: [""]
   resources: ["services"]
-  verbs: ["get","watch","list"]
+  verbs: ["get","watch","list","update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
